@@ -2,6 +2,7 @@ defmodule Hirem.CandidateController do
   use Hirem.Web, :controller
 
   alias Hirem.Candidate
+  alias Hirem.CandidateView
 
   plug :scrub_params, "candidate" when action in [:create, :update]
 
@@ -15,7 +16,8 @@ defmodule Hirem.CandidateController do
 
     case Repo.insert(changeset) do
       {:ok, candidate} ->
-        Hirem.Endpoint.broadcast! "candidates:updates", "newCandidate", Hirem.CandidateView.render("show.json", %{candidate: candidate})
+        candidates = Repo.all(Candidate)
+        Hirem.Endpoint.broadcast! "candidates:all", "change", %{candidates: CandidateView.render("index.json", %{candidates: candidates}) }
         conn
         |> put_status(:created)
         |> put_resp_header("location", candidate_path(conn, :show, candidate))
@@ -38,6 +40,7 @@ defmodule Hirem.CandidateController do
 
     case Repo.update(changeset) do
       {:ok, candidate} ->
+        Hirem.Endpoint.broadcast! "candidates:#{candidate.id}", "change", %{candidate: CandidateView.render("show.json", %{candidate: candidate}) }
         render(conn, "show.json", candidate: candidate)
       {:error, changeset} ->
         conn

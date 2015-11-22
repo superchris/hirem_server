@@ -2,7 +2,7 @@ defmodule Hirem.UserSocket do
   use Phoenix.Socket
 
   ## Channels
-  channel "candidates:updates", Hirem.CandidateChannel
+  channel "candidates:*", Hirem.CandidateChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket

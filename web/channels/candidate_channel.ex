@@ -1,12 +1,18 @@
 defmodule Hirem.CandidateChannel do
   use Hirem.Web, :channel
 
-  def join("candidates:updates", payload, socket) do
-    if authorized?(payload) do
-      {:ok, socket}
-    else
-      {:error, %{reason: "unauthorized"}}
-    end
+  alias Hirem.Repo
+  alias Hirem.CandidateView
+  alias Hirem.Candidate
+
+  def join("candidates:all", payload, socket) do
+    candidates = Repo.all(Candidate)
+    {:ok, %{candidates: CandidateView.render("index.json", %{candidates: candidates})}, socket}
+  end
+
+  def join("candidates:" <> id, payload, socket) do
+    candidate = Repo.get(Candidate, id)
+    {:ok, %{candidate: CandidateView.render("show.json", %{candidate: candidate})}, socket}
   end
 
   # Channels can be used in a request/response fashion
